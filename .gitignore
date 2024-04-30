@@ -1,0 +1,11 @@
+# ignore all . files and . folders
+.*
+*.db
+
+__pycache__
+Moderation/__pycache__
+Telemetry/__pycache__
+UI/__pycache__
+
+# Dont ignore .gitignore (this file)
+!/.gitignore
