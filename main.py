@@ -12,6 +12,7 @@ from discord import Embed, Colour
 import Moderation.moderation as Moderation
 import Telemetry.gap_to_fastest as gap_to_fastest
 import Telemetry.speed as speed
+import Telemetry.team_race_pace as team_race_pace
 from UI.ui import FeedbackModal
 
 # Load the Bot token from the env file
@@ -39,6 +40,31 @@ async def fastest(interaction: Interaction):
     feedback_modal.feedback_channel = FEEDBACK_CHANNEL
     feedback_modal.user = interaction.user
     await interaction.response.send_modal(feedback_modal)
+
+@tree.command(name="teams_race_pace", description="Rank team's race pace from the fastest to the slowest.")
+@app_commands.describe(gp="The Grand Prix (Australia)")
+@app_commands.describe(year="The Year (2022)")
+async def pace_cmd(interaction: Interaction, gp: str, year: int):
+    file_name = f"{gp}_{year}_R_{uuid.uuid1()}.png"
+    file_full_path = os.path.join(cache_dir, file_name)
+    await interaction.response.defer()
+    try:
+        event_name = team_race_pace.plot(year, gp, file_full_path)
+        file: File = File(file_full_path, filename="result.png")
+        # response
+        embed = Embed(
+            color=Colour.dark_purple(),
+            description=f'Team median race pace',
+            title=event_name,
+        )
+        embed.set_footer(text="Data from FastF1")
+        embed.set_image(url="attachment://result.png")
+        # edit the embed of the message
+        await interaction.followup.send(embed=embed, file=file)
+    except Exception as e:
+        print(f"something went wrong: {e}")
+        print(traceback.format_exc())
+        await interaction.followup.send(content="An error has occurred")
 
 @tree.command(name="speed_heatmap", description="Driver speed heatmap")
 @app_commands.describe(gp="The Grand Prix (Australia)")
