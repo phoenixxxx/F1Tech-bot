@@ -1,6 +1,9 @@
 from discord.ui import Modal, TextInput
 from discord import Interaction, TextStyle, Embed, Color
 
+from Database import feedback
+import datetime
+
 class FeedbackModal(Modal, title="Send us your feedback"):
     feedback_channel : int = None
 
@@ -19,10 +22,16 @@ class FeedbackModal(Modal, title="Send us your feedback"):
     )
     async def on_submit(self, interaction: Interaction) -> None:
         channel = interaction.guild.get_channel(self.feedback_channel)
-        embed = Embed(title="New Feedback", 
-                      description=self.fb_msg.value,
-                      color=Color.green())
         name = self.user.nick if self.user.nick else self.user.name
-        embed.set_author(name=name)
+        embed = Embed(
+                color=Color.light_grey(),
+                url=None,
+                title=f"Feedback received :clipboard:",
+                timestamp=datetime.datetime.now())
+        embed.add_field(name=self.fb_title.value, value=self.fb_msg.value, inline=False)
+        embed.add_field(name="from", value=f"{name}", inline=True)
+        embed.set_footer(text=f"Moderators are not guaranteed to respond", icon_url=None)
         await channel.send(embed=embed)
+
+        feedback.store(name, self.fb_title.value, self.fb_msg.value)
         await interaction.response.send_message(f"Thank you {name}", ephemeral=True)
