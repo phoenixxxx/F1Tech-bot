@@ -14,8 +14,8 @@ CLIENT: Final[int] = os.getenv('DISCORD_CLIENT')
 print(f"[main][Init] TOKEN is {TOKEN} CLIENT is {CLIENT}")
 
 # importing the command files
-from commands.slash import register as register_slash_commands
-from commands.menu import register as register_menu_commands
+from Commands.slash import register as register_slash_commands
+from Commands.menu import register as register_menu_commands
 
 # Bot setup
 intents = Intents.default()
