@@ -65,29 +65,28 @@ def store(msg_id: int, chl_id: int, jump_url: str, user_name: str, user_id: int,
     connection.commit()
     connection.close()
 
-def get_stats(jump_url: str) -> tuple[int, int, str]:
+def get_reports(jump_url: str) -> list[object]:
     connection = sqlite3.connect(DATABASE)
     cursor = connection.cursor()
-
-    report_count = 0
-    reporter_count = 0
-    latest_report = ""
+    results = list()
     try:
         cursor.execute(f"SELECT * FROM {MessageReportTable_name} WHERE jump_url=='{jump_url}' ORDER BY report_date")
         results = cursor.fetchall()
-        unique_reporters = list()
-        for result in results:
-            report_count += 1
-            reporter_id = result[2]
-            if reporter_id not in unique_reporters:
-                unique_reporters.append(reporter_id)
-                reporter_count += 1
-            latest_report = result[5]
     except sqlite3.OperationalError as e:
         print(f"get_stats failed with {e}")
         pass
-    
     connection.close()
+    return results
 
-    return report_count, reporter_count, latest_report
-    
+def get_report_count() -> int:
+    connection = sqlite3.connect(DATABASE)
+    cursor = connection.cursor()
+    count:int = 0
+    try:
+        cursor.execute(f"SELECT COUNT(*) FROM {MessageReportTable_name}")
+        count = cursor.fetchone()[0]
+    except sqlite3.OperationalError as e:
+        print(f"get_stats failed with {e}")
+        pass
+    connection.close()
+    return count
